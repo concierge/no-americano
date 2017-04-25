@@ -1,5 +1,7 @@
 const middleware = (message, thread, next) => {
-    console.error('here');
+    if (!exports.config) {
+        return next(message, thread);
+    }
     for (let am of exports.config.americanisms) {
         const r = new RegExp(am.americanism, 'gim');
         const m = [];
@@ -54,7 +56,7 @@ const defaultAmericanisms = [
     },
     {
         americanism: 'howdy',
-        correction: 'how do you do'
+        correction: 'Kia Ora'
     },
     {
         americanism: 'dunnit',
@@ -79,6 +81,74 @@ const defaultAmericanisms = [
     {
         americanism: 'trunk',
         correction: 'boot'
+    },
+    {
+        americanism: 'aluminum',
+        correction: 'aluminium'
+    },
+    {
+        americanism: 'shopping cart',
+        correction: 'shopping trolley'
+    },
+    {
+        americanism: 'train car',
+        correction: 'train carriage'
+    },
+    {
+        americanism: 'sulfur',
+        correction: 'sulphur'
+    },
+    {
+        americanism: 'coffee',
+        correction: 'tea'
+    },
+    {
+        americanism: 'automotive repair shop',
+        correction: 'panel beater'
+    },
+    {
+        americanism: 'trail',
+        correction: 'track'
+    },
+    {
+        americanism: 'hike',
+        correction: 'tramp'
+    },
+    {
+        americanism: 'trekking',
+        correction: 'tramping'
+    },
+    {
+        americanism: 'I\'m down',
+        correction: 'I\'m keen'
+    },
+    {
+        americanism: 'I\'d be up for that',
+        correction: 'I\'m keen'
+    },
+    {
+        americanism: 'I\'d',
+        correction: 'I would'
+    },
+    {
+        americanism: 'It\'s hot out$',
+        correction: 'It\'s hot outside'
+    },
+    {
+        americanism: 'It\'s cold out$',
+        correction: 'It\'s cold outside'
+    },
+    {
+        americanism: 'math$',
+        correction: 'maths'
+    },
+    {
+        americanism: 'waiting on',
+        correction: 'waiting for'
+    },
+    {
+        americanism: 'buck',
+        correction: 'dollar'
     }
 ];
 

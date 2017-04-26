@@ -1,38 +1,7 @@
-const middleware = (message, thread, next) => {
-    if (!exports.config) {
-        return next(message, thread);
-    }
-    for (let am of exports.config.americanisms) {
-        const r = new RegExp(am.americanism, 'gim');
-        const m = [];
-        let match;
-        while ((match = r.exec(message)) != null) {
-            m.push(match);
-        }
-        
-        if (m.length === 0) {
-            continue;
-        }
-        
-        const res = [message.substring(0, m[0].index)];
-        for (let i = 0; i < m.length - 1; i++) {
-            const c = m[i];
-            while (m[i+1].index < c.index + c.length) {
-                i++;
-            }
-            res.push(am.correction);
-            res.push(message.substring(c.index + c.length, m[i+1].index));
-        }
-        res.push(message.substr(m[m.length - 1].index + m[m.length - 1].length));
-        message = res.join('');
-    }
-    next(message, thread);
-};
-
 const defaultAmericanisms = [
     {
-        americanism: 'y(’|`|\'|\s)all|yawl',
-        correction: 'you-all'
+        americanism: 'y.all|yawl',
+        correction: 'bros'
     },
     {
         americanism: 'color',
@@ -149,13 +118,80 @@ const defaultAmericanisms = [
     {
         americanism: 'buck',
         correction: 'dollar'
+    },
+    {
+        americanism: 'french fries',
+        correction: 'hot chips'
+    },
+    {
+        americanism: 'alcohol',
+        correction: 'grog'
+    },
+    {
+        americanism: 'gas station',
+        correction: 'petrol station'
+    },
+    {
+        americanism: 'garbage',
+        correction: 'rubbish'
+    },
+    {
+        americanism: 'deplane',
+        correction: 'disembark'
+    },
+    {
+        americanism: 'take out',
+        correction: 'takeaways'
+    },
+    {
+        americanism: 'alternate',
+        correction: 'alternative'
     }
 ];
 
-exports.load = platform => {
-    if (!exports.config.americanisms) {
-        exports.config.americanisms = defaultAmericanisms;
+const ensure = (obj, def, ...args) => {
+    let res = obj;
+    for (let i = 0; i < args.length; i++) {
+        if (!res[args[i]]) {
+            if (i === args.length - 1) {
+                res[args[i]] = def;
+            }
+            else {
+                res[args[i]] = {};
+            }
+        }
+        res = res[args[i]];
     }
-    platform.use('after', middleware);
+    return res;
 };
+
+const middleware = (message, thread, next) => {
+    if (!exports.config) {
+        return next(message, thread);
+    }
+    const v = ensure(exports.config, [], thread, 'vetoes');
+    const a = ensure(exports.config, [], thread, 'americanisms').concat(defaultAmericanisms)
+        .filter(e => !v.includes(e.americanism));
+    for (let am of a) {
+        const r = new RegExp(am.americanism, 'gim');
+        const m = [];
+        let match;
+        while ((match = r.exec(message)) != null) {
+            m.push(match);
+        }
+        
+        if (m.length === 0) {
+            continue;
+        }
+        
+        let offset = 0;
+        for (let i of m) {
+            message = message.substr(0, i.index + offset) + am.correction + message.substr(i.index + offset + i[0].length);
+            offset += (am.correction.length - i[0].length);
+        }
+    }
+    next(message, thread);
+};
+
+exports.load = platform => platform.use('after', middleware);
 exports.unload = platform => platform.unuse('after', middleware);

@@ -1,6 +1,6 @@
 {
     "name": "no-americano",
-    "version": "0.0.1",
+    "version": "1.0.1",
     "startup": "americanisms.js",
     "type": "service"
 }
